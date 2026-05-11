@@ -15,7 +15,7 @@ The following guide assumes you have a 'Code' folder you keep your git repositor
     git clone https://github.com/webmariner/Buzzby
 
 ## Badge app
-The badge client app is a MicroPython program which is stored in the Radiolarian's onboard [M24128](https://www.st.com/resource/en/datasheet/m24128-u.pdf) [>(EEPROM) electrically erasable programmable read-only memory] chip, along with some [information to identify the Hexpansion to the badge OS as being a Radiolarian board](). When the Radiolarian is connected to the badge, the badge automatically loads and runs the app.
+The badge client app is a MicroPython program which is stored in the Radiolarian's onboard [M24128](https://www.st.com/resource/en/datasheet/m24128-u.pdf) [>(EEPROM) electrically erasable programmable read-only memory] chip, along with some [information to identify the Hexpansion to the badge OS as being a Radiolarian board](https://badge.emfcamp.org/Tildagon/UHB-IF/Uncontrolled_IDs/). When the Radiolarian is connected to the badge, the badge automatically loads and runs the app.
 
 ### Changing the badge app
 Install Python 3 and mpremote. I had Python 3 already so I used `pip install --user mpremote` and made sure `~/.local/bin/` was in my PATH.
