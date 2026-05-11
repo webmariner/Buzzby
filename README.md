@@ -1,5 +1,5 @@
 # Buzzby
-A pager message receiver app for the custom [Radiolarian](https://github.com/webmariner/Radiolarian) [>(Hexpansion) hardware expansion] to the [EMF](https://www.emfcamp.org/about) [Tildagon badge](https://tildagon.badge.emfcamp.org/).
+A pager message receiver app for the custom [Radiolarian](https://github.com/webmariner/Radiolarian) [>(Hexpansion) hardware expansion] to the [EMF](https://www.emfcamp.org/about) [Tildagon badge](https://tildagon.badge.emfcamp.org/), based on Erik Dorstel's [pocsagRX](https://github.com/ErikDorstel/pocsagRX) and in turn Andy Uribe and Florian Wolters' [POCSAG_HS](https://github.com/phl0/POCSAG_HS).
 
 It consists of:
 - a badge app to fetch messages from the Radiolarian when it says there are some waiting
@@ -18,7 +18,7 @@ The following guide assumes you have a 'Code' folder you keep your git repositor
 The badge client app is a MicroPython program which is stored in the Radiolarian's onboard [M24128](https://www.st.com/resource/en/datasheet/m24128-u.pdf) [>(EEPROM) electrically erasable programmable read-only memory] chip, along with some [information to identify the Hexpansion to the badge OS as being a Radiolarian board](https://badge.emfcamp.org/Tildagon/UHB-IF/Uncontrolled_IDs/). When the Radiolarian is connected to the badge, the badge automatically loads and runs the app.
 
 ### Changing the badge app
-Install Python 3 and mpremote. I had Python 3 already so I used `pip install --user mpremote` and made sure `~/.local/bin/` was in my PATH.
+You'll need Python 3 and [mpremote](https://docs.micropython.org/en/latest/reference/mpremote.html). There are various ways to install these depending on your operating system and what else you get up to with your machine. I had Python already so I used `pip install --user mpremote` and made sure `~/.local/bin/` was in my PATH.
 
 Clone the badge-2024-software repo and cd into it:
 
