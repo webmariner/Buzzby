@@ -3,12 +3,13 @@
 //#include <task.h>
 
 
-#include "Log.h"
-Logging Log;
+//#include "Log.h"
+#include "src/ArduinoLog.h"
+//Logging Log;
 #include "PagerQueue.h"
 PagerQueue pager;
 #include "SX1278.h"
-SX1278FSK modem(false,0);
+SX1278FSK modem(false);
 #include <USB.h>
 #include "Tildagon.h"
 #include "CLI.h"
@@ -19,6 +20,8 @@ void setup() {
   USB.setManufacturer("ECHQ");
   USB.setProduct("Radiolarian Buzzby Controller");
   USB.connect();
+  Serial.begin(115200);
+  Log.begin(LOG_LEVEL_WARNING, &Serial, false);
   modem.radioSetup();
   readFlash();
   tildagonSetup();

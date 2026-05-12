@@ -117,9 +117,8 @@ public:
   uint32_t messageCount;
   uint32_t upTime;
 
-  SX1278FSK(bool _monitorRx = false, uint8_t _debug = 0) {
+  SX1278FSK(bool _monitorRx = false) {
     monitorRx = _monitorRx;
-    Log.debug = _debug;
   }
 
   uint8_t readSPI(uint8_t addr) {
@@ -165,14 +164,14 @@ public:
   void regDump() {
     for (uint8_t reg = 0x00; reg <= 0x42; reg++) {
       uint8_t value = readSPI(reg);
-      Log.print(0, "0x%02x:     0x%02x     %3u     0b%s\r\n", reg, value, value, String(value, BIN).c_str());
+      Log.infoln("0x%02x:     0x%02x     %3u     0b%s", reg, value, value, String(value, BIN).c_str());
     }
   }
 
   void setFrequency(double _centerFreq, double _rxOffset = 0) {
     centerFreq = _centerFreq;
     rxOffset = _rxOffset;
-    Log.print(0, "Center Frequency: %s MHz\r\n", String(centerFreq + (rxOffset / 1000), 5).c_str());
+    Log.infoln("Center Frequency: %s MHz", String(centerFreq + (rxOffset / 1000), 5).c_str());
     uint32_t value = (uint32_t)round((centerFreq + (rxOffset / 1000)) * (1 << 14));
     writeSPI(regFreqMSB, (value & 0xFF0000) >> 16);
     writeSPI(regFreqMID, (value & 0x00FF00) >> 8);
@@ -181,7 +180,7 @@ public:
 
   void setBitrate(double _bitrate) {
     bitrate = _bitrate;
-    Log.print(0, "Bitrate: %s bps\r\n", String(bitrate * 1000, 0).c_str());
+    Log.infoln("Bitrate: %s bps", String(bitrate * 1000, 0).c_str());
     uint16_t value = (uint16_t)round(32000.0 / bitrate);
     writeSPI(regBrMSB, (value & 0xFF00) >> 8);
     writeSPI(regBrLSB, value & 0x00FF);
@@ -189,7 +188,7 @@ public:
 
   void setShift(double _shift) {
     shift = _shift;
-    Log.print(0, "Shift: +/- %s Hz\r\n", String(shift * 1000, 0).c_str());
+    Log.infoln("Shift: +/- %s Hz", String(shift * 1000, 0).c_str());
     uint16_t value = (uint16_t)round(shift * (1 << 11) / 125.0);
     writeSPI(regShiftMSB, (value & 0xFF00) >> 8);
     writeSPI(regShiftLSB, value & 0x00FF);
@@ -203,7 +202,7 @@ public:
         break;
       }
     }
-    Log.print(0, "Rx Bandwidth: %s kHz\r\n", String(bwValues[selected], 1).c_str());
+    Log.infoln("Rx Bandwidth: %s kHz", String(bwValues[selected], 1).c_str());
     setReg(regRxBw, 4, 0, bwIntegers[selected]);
     rxBandwidth = bwValues[selected];
   }
@@ -220,7 +219,7 @@ public:
         break;
       }
     }
-    Log.print(0, "AFC Bandwidth: %s kHz\r\n", String(bwValues[selected], 1).c_str());
+    Log.infoln("AFC Bandwidth: %s kHz", String(bwValues[selected], 1).c_str());
     setReg(regAfcBw, 4, 0, bwIntegers[selected]);
     afcBandwidth = bwValues[selected];
   }
@@ -334,11 +333,11 @@ public:
   }
 
   void printChip() {
-    Log.print(0, "SX1278 Chip Version: %i Hardware Revision: %i\r\n", getReg(regChipVersion, 7, 4), getReg(regChipVersion, 3, 0));
+    Log.infoln("SX1278 Chip Version: %i Hardware Revision: %i", getReg(regChipVersion, 7, 4), getReg(regChipVersion, 3, 0));
   }
 
   void printRx() {
-    Log.print(0, "RSSI: %s dBm   Gain: %s dBm   AFC: %s kHz   FEI: %s kHz\r\n", String(getRSSI(), 1).c_str(), String(getGain(), 1).c_str(), String(getAFC(), 3).c_str(), String(getFEI(), 3).c_str());
+    Log.infoln("RSSI: %s dBm   Gain: %s dBm   AFC: %s kHz   FEI: %s kHz", String(getRSSI(), 1).c_str(), String(getGain(), 1).c_str(), String(getAFC(), 3).c_str(), String(getFEI(), 3).c_str());
   }
 
   void radioSetup() {
@@ -376,20 +375,20 @@ public:
     startSequencer();
     delay(500);
     timerRx = millis() + 1000;
-    Log.print(0, "POCSAG Rx started\r\n");
+    Log.traceln("POCSAG Rx started");
   }
 
   void messageReceived() {
-    Log.print(2, "    BCH Errors: %i/%i\r\n", error.corrected, error.uncorrected);
-    Log.print(3, "    Message as numeric: %s\r\n", messageNumeric.c_str());
-    Log.print(3, "    Message as alpha  : %s\r\n", messageAlpha.c_str());
+    Log.verboseln("    BCH Errors: %i/%i", error.corrected, error.uncorrected);
+    Log.traceln("    Message as numeric: %s", messageNumeric.c_str());
+    Log.traceln("    Message as alpha  : %s", messageAlpha.c_str());
     String message = guessFormat(messageAlpha, messageNumeric);
     String postValue = "rssi:     " + String(rssi, 1);
     postValue += "\r\nerror:    " + String(error.uncorrected);
     postValue += "\r\nric:      " + String(ric);
     postValue += "\r\nfunction: " + String(int(function));
-    postValue += "\r\nmessage:  " + message + "\r\n";
-    Log.print(1, postValue.c_str());
+    postValue += "\r\nmessage:  " + message;
+    Log.infoln(postValue.c_str());
     error.corrected = 0;
     error.uncorrected = 0;
     messageAlpha = "";
@@ -418,15 +417,15 @@ public:
     if (detectDIO0Flag) {
       detectDIO0Flag = false;
       taskEXIT_CRITICAL();
-      Log.print(2, "Preamble Detected!\r\n");
+      Log.verboseln("Preamble Detected!");
       if (rxOffset == 0) {
         rxOffset = getAFC();
-        Log.print(0, "Auto Rx Offset: %s kHz detected\r\n", String(rxOffset, 3).c_str());
+        Log.verboseln("Auto Rx Offset: %s kHz detected", String(rxOffset, 3).c_str());
       }
 
-      if (Log.debug) printRx();
+      if (Log.getLevel() > LOG_LEVEL_WARNING) printRx();
 
-      Log.print(3, "Bytes queued: %i/%i\r\n", uxQueueMessagesWaitingFromISR(queueDIO1), queueSizeDIO1);
+      Log.verboseln("Bytes queued: %i/%i", uxQueueMessagesWaitingFromISR(queueDIO1), queueSizeDIO1);
       rssi = getRSSI() - getGain();
       error.corrected = 0;
       error.uncorrected = 0;
@@ -446,7 +445,7 @@ public:
       if (bitShift == 255) return;
 
       timerRx = millis() + 1000;
-      Log.print(3, "Sync Frame Detected! Bit Shift: %i\r\n", bitShift);
+      Log.verboseln("Sync Frame Detected! Bit Shift: %i", bitShift);
       uint32_t frame[16] = { 0 };
 
       for (uint8_t idx = 0; idx <= 63; idx++) {
@@ -490,30 +489,30 @@ public:
         errorCount.corrected += currentError.corrected;
         errorCount.uncorrected += currentError.uncorrected;
 
-        Log.print(3, "%02u: ", idx);
+        Log.verbose("%02u: ", idx);
         for (int8_t bit = 31; bit >= 0; bit--) {
           if (bit == 30 || (isAddress && bit == 12) || bit == 10 || bit == 0) {
-            Log.write(3, 0x20);
+            Log.verbose(" ");
           }
           if (frame[idx] & (1 << bit)) {
-            Log.write(3, 0x31);
+            Log.verbose("1");
           } else {
-            Log.write(3, 0x30);
+            Log.verbose("0");
           }
         }
         if (isIdle) {
-          Log.print(3, " Idle\r\n");
+          Log.verboseln(" Idle");
         }
         if (isAddress) {
-          Log.print(3, " Address\r\n");
+          Log.verboseln(" Address");
         } else {
-          Log.print(3, " Message\r\n");
+          Log.verboseln(" Message");
         }
-        Log.print(3, " BCH Error %i/%i\r\n", currentError.corrected, currentError.uncorrected);
+        Log.verboseln(" BCH Error %i/%i", currentError.corrected, currentError.uncorrected);
 
         if (isAddress && (!isIdle)) {
           ric = ((frame[idx] & 0x7fffe000) >> 10) | (idx >> 1);
-          Log.print(2, "  RIC: %i\r\n", ric);
+          Log.traceln("  RIC: %i", ric);
           function = (frame[idx] & 0x1800) >> 11;
         }
         if (isAddress) {

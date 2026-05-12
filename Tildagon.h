@@ -76,14 +76,14 @@ void tildagonSetup() {
   messageWaitingFlag = false;
   digitalWrite(HIGH_SPEED_F, LOW);
   tildagonSetupComplete = true;
-  Log.print(0,"\r\nTildagon I2C and HS_1 setup complete\r\n");
+  Log.traceln("Tildagon I2C and HS_1 setup complete");
 }
 
 void setMessageWaitingFlag() {
   if (!messageWaitingFlag) {
     messageWaitingFlag = true;
     digitalWrite(HIGH_SPEED_F, HIGH);
-    Log.print(0, "\r\nTildagon MWI ON\r\n");
+    Log.traceln( "Tildagon MWI ON");
   }
 }
 
@@ -91,14 +91,14 @@ void clearMessageWaitingFlag() {
   if (messageWaitingFlag) {
     messageWaitingFlag = false;
     digitalWrite(HIGH_SPEED_F, LOW);
-    Log.print(0, "\r\nTildagon MWI OFF\r\n");
+    Log.traceln( "Tildagon MWI OFF");
   }
 }
 
 void tildagonTeardown() {
   Wire.end();
   tildagonSetupComplete = false;
-  Log.print(0,"Tildagon I2C deinitialised\r\n");
+  Log.traceln("Tildagon I2C deinitialised");
 }
 
 void tildagonLoop() {

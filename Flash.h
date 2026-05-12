@@ -7,12 +7,12 @@ Preferences flash;
 
 void getFlash() {
   flash.begin("SX1278FSK",true);
-  Log.print(0,"Center Frequency: %s MHz\r\n",String(flash.getDouble("centerFreq",439.9875),5).c_str());
-  Log.print(0,"Rx Frequency Offset: %s kHz\r\n",String(flash.getDouble("rxOffset",0.0),3).c_str());
-  Log.print(0,"Bitrate: %s bps\r\n",String(flash.getDouble("bitrate",1.2)*1000,0).c_str());
-  Log.print(0,"Shift Frequency: +/- %s Hz\r\n",String(flash.getDouble("shift",4.5)*1000,0).c_str());
-  Log.print(0,"Rx Bandwidth: %s kHz\r\n",String(flash.getDouble("rxBandwidth",5.2),1).c_str());
-  Log.print(0,"AFC Bandwidth: %s kHz\r\n",String(flash.getDouble("afcBandwidth",25),1).c_str());
+  Log.infoln("Center Frequency: %s MHz",String(flash.getDouble("centerFreq",439.9875),5).c_str());
+  Log.infoln("Rx Frequency Offset: %s kHz",String(flash.getDouble("rxOffset",0.0),3).c_str());
+  Log.infoln("Bitrate: %s bps",String(flash.getDouble("bitrate",1.2)*1000,0).c_str());
+  Log.infoln("Shift Frequency: +/- %s Hz",String(flash.getDouble("shift",4.5)*1000,0).c_str());
+  Log.infoln("Rx Bandwidth: %s kHz",String(flash.getDouble("rxBandwidth",5.2),1).c_str());
+  Log.infoln("AFC Bandwidth: %s kHz",String(flash.getDouble("afcBandwidth",25),1).c_str());
   flash.end();
 }
 
@@ -27,7 +27,7 @@ void readFlash() {
   modem.startSequencer();
   modem.restartRx(true);
   flash.end();
-  Log.print(0,"Flash: read\r\n");
+  Log.infoln("Flash: read");
 }
 
 void writeFlash() {
@@ -39,13 +39,13 @@ void writeFlash() {
   flash.putDouble("rxBandwidth",modem.rxBandwidth);
   flash.putDouble("afcBandwidth",modem.afcBandwidth);
   flash.end();
-  Log.print(0,"Flash: written\r\n");
+  Log.infoln("Flash: written");
 }
 
 void eraseFlash() {
   flash.begin("SX1278FSK",false);
   flash.clear();
-  Log.print(0,"Flash: erased\r\n");
+  Log.infoln("Flash: erased");
 }
 
 #endif
