@@ -4,7 +4,16 @@
 #include "src/BCH3121.h"
 CBCH3121 bch;
 #include <SPI.h>
-#include "SX1278ISR.h"
+
+const pin_size_t SX1278_SCK = 18;
+const pin_size_t SX1278_MISO = 16;
+const pin_size_t SX1278_MOSI = 19;
+const pin_size_t SX1278_CS = 17;
+const pin_size_t SX1278_RST = 22;
+const pin_size_t SX1278_DIO0 = 10;
+const pin_size_t SX1278_DIO1 = 11;
+const pin_size_t SX1278_DIO2 = 12;
+const pin_size_t SX1278_DIO3 = 13;
 
 #define regOpMode 0x1
 #define regBrMSB 0x2
@@ -60,7 +69,40 @@ const double bwValues[21] = { 2.6, 3.1, 3.9, 5.2, 6.3, 7.8, 10.4, 12.5, 15.6, 20
 const uint8_t bwIntegers[21] = { 23, 15, 7, 22, 14, 6, 21, 13, 5, 20, 12, 4, 19, 11, 3, 18, 10, 2, 17, 9, 1 };
 const uint8_t syncWord[4] = { 0x7c, 0xd2, 0x15, 0xd8 };
 const char bcdCodes[16] = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x2a, 0x55, 0x20, 0x2d, 0x29, 0x28 };
+volatile bool detectDIO0Flag = false;
+volatile bool detectDIO3Flag = false;
 
+xQueueHandle queueDIO1;
+UBaseType_t queueSizeDIO1 = 1024;
+
+// Interrupt Service Routines for SX1278
+void dio0ISR() {
+  UBaseType_t uxSavedInterruptStatus;
+  uxSavedInterruptStatus = portENTER_CRITICAL_FROM_ISR();
+  detectDIO0Flag = true;
+  portEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
+}
+
+void dio1ISR() {
+  static uint8_t buffer = 0;
+  static uint8_t bufferMask = 128;
+  if (digitalRead(SX1278_DIO2) == LOW) {
+    buffer |= bufferMask;
+  }
+  bufferMask >>= 1;
+  if (bufferMask == 0) {
+    xQueueSendFromISR(queueDIO1, &buffer, NULL);
+    buffer=0;
+    bufferMask=128;
+  }
+}
+
+void dio3ISR() {
+  UBaseType_t uxSavedInterruptStatus;
+  uxSavedInterruptStatus = portENTER_CRITICAL_FROM_ISR();
+  detectDIO3Flag = true;
+  portEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
+}
 
 class SX1278FSK {
 public:
