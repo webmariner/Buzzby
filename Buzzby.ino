@@ -1,11 +1,4 @@
-//#define __FREERTOS 1
-//#include <FreeRTOS.h>
-//#include <task.h>
-
-
-//#include "Log.h"
 #include "src/ArduinoLog.h"
-//Logging Log;
 #include "PagerQueue.h"
 PagerQueue pager;
 #include "SX1278.h"
@@ -23,7 +16,7 @@ void setup() {
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
   modem.radioSetup();
-  readFlash();
+  loadSettings();
   tildagonSetup();
   delay(4000);
 }

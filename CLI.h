@@ -1,7 +1,7 @@
 #ifndef BUZZBY_CLI_H
 #define BUZZBY_CLI_H
 
-#include "Flash.h"
+#include "Settings.h"
 
 String cmdLine="";
 
@@ -21,10 +21,10 @@ void help() {
   Log.infoln("set afcbw [2.6-250|auto]");
   Log.infoln("restart rx");
   Log.infoln("restart cpu");
-  Log.infoln("get flash");
-  Log.infoln("read flash");
-  Log.infoln("write flash");
-  Log.infoln("erase flash");
+  Log.infoln("show settings");
+  Log.infoln("load settings");
+  Log.infoln("save settings");
+  Log.infoln("erase settings");
   Log.infoln("tildagon reset");
   Log.infoln("exit");
   Log.infoln("help");
@@ -104,14 +104,14 @@ void doParse() {
     Log.infoln("Rx and PLL restarted");
   } else if (cmdLine.startsWith("restart cpu")) {
     rp2040.restart();
-  } else if (cmdLine.startsWith("get flash")) {
-    getFlash();
-  } else if (cmdLine.startsWith("read flash")) {
-    readFlash();
-  } else if (cmdLine.startsWith("write flash")) {
-    writeFlash();
-  } else if (cmdLine.startsWith("erase flash")) {
-    eraseFlash();
+  } else if (cmdLine.startsWith("show set")) {
+    showSettings();
+  } else if (cmdLine.startsWith("load set")) {
+    loadSettings();
+  } else if (cmdLine.startsWith("save set")) {
+    saveSettings();
+  } else if (cmdLine.startsWith("erase set")) {
+    eraseSettings();
   } else if (cmdLine.startsWith("tildagon reset")) {
     tildagonTeardown();
     tildagonSetup();

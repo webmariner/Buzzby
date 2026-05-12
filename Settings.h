@@ -1,11 +1,10 @@
-#ifndef BUZZBY_FLASH_H
-#define BUZZBY_FLASH_H
+#ifndef BUZZBY_SETTINGS_H
+#define BUZZBY_SETTINGS_H
 
 #include <Preferences.h>
-
 Preferences flash;
 
-void getFlash() {
+void showSettings() {
   flash.begin("SX1278FSK",true);
   Log.infoln("Center Frequency: %s MHz",String(flash.getDouble("centerFreq",439.9875),5).c_str());
   Log.infoln("Rx Frequency Offset: %s kHz",String(flash.getDouble("rxOffset",0.0),3).c_str());
@@ -16,7 +15,7 @@ void getFlash() {
   flash.end();
 }
 
-void readFlash() {
+void loadSettings() {
   flash.begin("SX1278FSK",true);
   modem.stopSequencer();
   modem.setFrequency(flash.getDouble("centerFreq",439.9875),flash.getDouble("rxOffset",0.0));
@@ -30,7 +29,7 @@ void readFlash() {
   Log.infoln("Flash: read");
 }
 
-void writeFlash() {
+void saveSettings() {
   flash.begin("SX1278FSK",false);
   flash.putDouble("centerFreq",modem.centerFreq);
   flash.putDouble("rxOffset",modem.rxOffset);
@@ -42,7 +41,7 @@ void writeFlash() {
   Log.infoln("Flash: written");
 }
 
-void eraseFlash() {
+void eraseSettings() {
   flash.begin("SX1278FSK",false);
   flash.clear();
   Log.infoln("Flash: erased");
