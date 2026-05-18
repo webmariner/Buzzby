@@ -1,9 +1,11 @@
 #include "src/ArduinoLog.h"
 #include "PagerQueue.h"
-PagerQueue pager;
-#include "SX1278.h"
-SX1278FSK modem(false);
+#include "PagerReceiver.h"
 #include <USB.h>
+
+PagerQueue pagerq;
+PagerReceiver pagerRx;
+
 #include "Tildagon.h"
 #include "CLI.h"
 
@@ -15,7 +17,7 @@ void setup() {
   USB.connect();
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
-  modem.radioSetup();
+  pagerRx.setup(pagerq);
   loadSettings();
   tildagonSetup();
   delay(4000);
@@ -28,7 +30,7 @@ void loop() {
     }
     rp2040.rebootToBootloader();
   }
-  modem.pocsagWorker();
+  pagerRx.pocsagWorker();
   tildagonLoop();
   cliWorker();
 }

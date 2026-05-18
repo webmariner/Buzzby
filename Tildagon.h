@@ -35,25 +35,25 @@ void handleDataRequest() {
   if (badgeCommandBuffer[0] > 0) {
     switch (badgeCommandBuffer[0]) {
       case CMD_READ_MSG_LENGTH:
-        Wire.write(pager.currentMessage().text.length());
+        Wire.write(pagerq.currentMessage().text.length());
         badgeCommandBuffer[0] = 0;
         break;
       case CMD_READ_MSG_BODY:
-        pager.currentMessage().text.toCharArray(tildagonTextOutputBuffer, pager.currentMessage().text.length() + 1);
-        Wire.write(tildagonTextOutputBuffer, pager.currentMessage().text.length());
+        pagerq.currentMessage().text.toCharArray(tildagonTextOutputBuffer, pagerq.currentMessage().text.length() + 1);
+        Wire.write(tildagonTextOutputBuffer, pagerq.currentMessage().text.length());
         badgeCommandBuffer[0] = 0;
-        //pager.markAsRead();
+        //pagerq.markAsRead();
         break;
       case CMD_READ_RIC:
-        tildagonNumericOutputBuffer[3] = (pager.currentMessage().ric >> 24) & 0xFF;
-        tildagonNumericOutputBuffer[2] = (pager.currentMessage().ric >> 16) & 0xFF;
-        tildagonNumericOutputBuffer[1] = (pager.currentMessage().ric >> 8) & 0xFF;
-        tildagonNumericOutputBuffer[0]  = pager.currentMessage().ric & 0xFF;
+        tildagonNumericOutputBuffer[3] = (pagerq.currentMessage().ric >> 24) & 0xFF;
+        tildagonNumericOutputBuffer[2] = (pagerq.currentMessage().ric >> 16) & 0xFF;
+        tildagonNumericOutputBuffer[1] = (pagerq.currentMessage().ric >> 8) & 0xFF;
+        tildagonNumericOutputBuffer[0]  = pagerq.currentMessage().ric & 0xFF;
         Wire.write(tildagonNumericOutputBuffer, 4);
         badgeCommandBuffer[0] = 0;
         break;
       case CMD_READ_SETTING:
-        workingNumber = (uint32_t)round((modem.centerFreq+(modem.rxOffset/1000))*(1<<14));
+        workingNumber = (uint32_t)round(pagerRx.getFrequency()*(1<<14));
         tildagonNumericOutputBuffer[3] = (workingNumber >> 24) & 0xFF;
         tildagonNumericOutputBuffer[2] = (workingNumber >> 16) & 0xFF;
         tildagonNumericOutputBuffer[1] = (workingNumber >> 8) & 0xFF;
@@ -105,21 +105,21 @@ void tildagonLoop() {
   if (badgeCommandBuffer[0] > 0) {
     switch (badgeCommandBuffer[0]) {
       case CMD_MSG_RECEIVED:
-        pager.markAsRead();
+        pagerq.markAsRead();
         badgeCommandBuffer[0] = 0;
         break;
       case CMD_NEXT_SETTING:
         ;//TODO:Move to next frequency and baud combo
     }
   }
-  if (pager.messagesWaiting()) {
-    if (pager.currentMessage().text.length() > 0) {
+  if (pagerq.messagesWaiting()) {
+    if (pagerq.currentMessage().text.length() > 0) {
       setMessageWaitingFlag();
     } else {
-      pager.markAsRead();
+      pagerq.markAsRead();
     }
   }
-  if (!pager.messagesWaiting()) {
+  if (!pagerq.messagesWaiting()) {
     clearMessageWaitingFlag();
   }
 }
