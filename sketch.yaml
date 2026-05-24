@@ -1,6 +1,6 @@
 profiles:
   pico:
-    fqbn: rp2040:rp2040:rpipico:os=freertos,freq=200,exceptions=Enabled,opt=Small,rtti=Disabled,ipbtstack=ipv4only,uploadmethod=default
+    fqbn: rp2040:rp2040:rpipico:flash=2097152_65536,os=freertos,freq=200,exceptions=Enabled,opt=Small,rtti=Disabled,ipbtstack=ipv4only,uploadmethod=default
     platforms:
       - platform: rp2040:rp2040 (5.5.1)
         platform_index_url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json

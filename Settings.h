@@ -4,30 +4,46 @@
 #include <Preferences.h>
 Preferences prefs;
 
+const char* FLASH_SETUP_WARNING = "Check flash is configured to allow a small filesystem for settings too, not all just reserved for this code";
+
 void showSettings() {
-  prefs.begin("POCSAG", true);
-  Log.infoln("Frequency: %s MHz",String(prefs.getDouble("frequency",439.9875),5).c_str());
-  Log.infoln("Bitrate: %s bps",String(prefs.getDouble("bitrate",1.2)*1000,0).c_str());;
+  if (!prefs.begin("POCSAG", true)) {
+    Log.warningln(FLASH_SETUP_WARNING);
+  }
+  Log.infoln("Frequency: %s MHz",String(prefs.getDouble("frequency"),5).c_str());
+  Log.infoln("Bitrate: %s kbps",String(prefs.getDouble("bitrate"),3).c_str());
   prefs.end();
 }
 
 void loadSettings() {
-  prefs.begin("POCSAG", true);
+  if (!prefs.begin("POCSAG", true)) {
+    Log.warningln(FLASH_SETUP_WARNING);
+  }
   pagerRx.updateSettings(prefs.getDouble("frequency", 439.9875), prefs.getDouble("bitrate", 1.2));
   prefs.end();
   Log.infoln("Settings loaded");
 }
 
 void saveSettings() {
-  prefs.begin("POCSAG", false);
-  prefs.putDouble("frequency",pagerRx.getFrequency());
-  prefs.putDouble("bitrate",pagerRx.getBitrate());
+  if (!prefs.begin("POCSAG", false)) {
+    Log.warningln(FLASH_SETUP_WARNING);
+  }
+  double frequency = pagerRx.getFrequency();
+  double bitrate = pagerRx.getBitrate();
+  prefs.putDouble("frequency",frequency);
+  prefs.putDouble("bitrate",bitrate);
+  Log.infoln("Settings saved: Frequency %s MHz, Bitrate %s kbps",
+    String(frequency, 5).c_str(),
+    String(bitrate, 3).c_str()
+  );
   prefs.end();
   Log.infoln("Settings saved");
 }
 
 void eraseSettings() {
-  prefs.begin("POCSAG", false);
+  if (!prefs.begin("POCSAG", false)) {
+    Log.warningln(FLASH_SETUP_WARNING);
+  }
   prefs.clear();
   Log.infoln("Settings erased");
 }
