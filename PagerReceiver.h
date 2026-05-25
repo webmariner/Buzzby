@@ -21,7 +21,8 @@ const char bcdCodes[16] = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
 
 class PagerReceiver {
 public:
-    void setup(PagerQueue pagerq);
+    void setup();
+    PagerQueue getMessageQueue();
     void updateSettings(double frequency, double bitrate);
     void pocsagWorker();
     double getFrequency();

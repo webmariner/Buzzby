@@ -24,14 +24,13 @@ public:
   void eraseChannel(const char* channelName);
   void next();
   void save();
-  const PagerMessage& getCurrentMsg() const;
+  const PagerMessage& getCurrentMsg();
   bool messagesWaiting();
   void markAsRead();
   void loop();
 private:
   PagerReceiver _pagerRx;
   ChannelMemory _channels;
-  PagerQueue _pagerq;
   const char* _currentChannel;
   uint8_t _channelNumber;
   OutputHandler _out;

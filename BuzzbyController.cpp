@@ -11,7 +11,7 @@ const char* DEFAULT_CHANNEL = STANDARD_CHANNEL_NAMES[0];
 
 void BuzzbyController::setup(Print* printer) {
 	_out.setup(printer);
-	_pagerRx.setup(_pagerq);
+	_pagerRx.setup();
 	_currentChannel = CHANNEL_NOT_SET;
 	_channelNumber = 0;
 	if (!selectChannel(DEFAULT_CHANNEL)) {
@@ -34,9 +34,8 @@ void BuzzbyController::printSettings() {
 }
 
 void BuzzbyController::printCurrentMessage() {
-	if (messagesWaiting()) {
-		PagerMessage curMsg = getCurrentMsg();
-		_out.println(curMsg.text.c_str());
+	if (_pagerRx.getMessageQueue().messagesWaiting()) {
+		_out.println(_pagerRx.getMessageQueue().currentMessage().text.c_str());
 	} else {
 		_out.println("No messages waiting");
 	}
@@ -65,7 +64,7 @@ void BuzzbyController::restart() {
 }
 
 bool BuzzbyController::showChannel(const char* channelName) {
-	return _channels.showChannel(channelName);
+	return _channels.showChannel(channelName, _out);
 }
 
 bool BuzzbyController::selectChannel(const char* channelName) {
@@ -111,16 +110,16 @@ void BuzzbyController::save() {
 	saveChannel(STANDARD_CHANNEL_NAMES[_channelNumber]);
 }
 
-const PagerMessage& BuzzbyController::getCurrentMsg() const {
-	return _pagerq.currentMessage();
+const PagerMessage& BuzzbyController::getCurrentMsg() {
+	return _pagerRx.getMessageQueue().currentMessage();
 }
 
 bool BuzzbyController::messagesWaiting() {
-	return _pagerq.messagesWaiting();
+	return _pagerRx.getMessageQueue().messagesWaiting();
 }
 
 void BuzzbyController::markAsRead() {
-	_pagerq.markAsRead();
+	_pagerRx.getMessageQueue().markAsRead();
 }
 
 void BuzzbyController::loop() {

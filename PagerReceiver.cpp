@@ -102,9 +102,7 @@ PagerReceiver::PagerReceiver() {
     this->_radio = new SX1278(DEFAULT_FREQUENCY, DEFAULT_BITRATE, 4.5, 5.2, 25);
 }
 
-  void PagerReceiver::setup(PagerQueue pagerq) {
-    _pagerq = pagerq;
-
+  void PagerReceiver::setup() {
     // Initialise SX1278 hardware & IO
     _radio->setup();
 
@@ -124,6 +122,10 @@ PagerReceiver::PagerReceiver() {
     delay(500);
     timerRx = millis() + 1000;
     Log.traceln("POCSAG Rx started");
+  }
+
+  PagerQueue PagerReceiver::getMessageQueue() {
+    return _pagerq;
   }
 
   void PagerReceiver::updateSettings(double frequency, double bitrate) {

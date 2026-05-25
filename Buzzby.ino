@@ -1,11 +1,13 @@
+#include <USB.h>
 #include "src/ArduinoLog.h"
 #include "BuzzbyController.h"
-#include <USB.h>
+#include "CLI.h"
 
 BuzzbyController controller;
 
 #include "Tildagon.h"
-#include "CLI.h"
+
+CLI cli;
 
 void setup() {
   USB.disconnect();
@@ -16,6 +18,7 @@ void setup() {
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
   controller.setup(&Serial);
+  cli.setup(&Serial, &Serial, &controller);
   tildagonSetup();
   delay(4000);
 }
@@ -29,5 +32,5 @@ void loop() {
   }
   controller.loop();
   tildagonLoop();
-  cliWorker();
+  cli.cliWorker();
 }
