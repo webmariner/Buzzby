@@ -99,7 +99,7 @@ uint8_t PagerReceiver::read() {
 }
 
 PagerReceiver::PagerReceiver() {
-    this->_radio = new SX1278(439.9875, 1.2, 4.5, 5.2, 25);
+    this->_radio = new SX1278(DEFAULT_FREQUENCY, DEFAULT_BITRATE, 4.5, 5.2, 25);
 }
 
   void PagerReceiver::setup(PagerQueue pagerq) {

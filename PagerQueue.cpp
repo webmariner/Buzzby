@@ -2,14 +2,14 @@
 #include <stdexcept>
 #include "PagerQueue.h"
 
-void PagerQueue::push(const Message& message) {
+void PagerQueue::push(const PagerMessage& message) {
     messages_.push_back(message);
     if (messages_.size() > 10) {
         messages_.erase(messages_.begin()+1);
     }
 }
 
-std::optional<Message> PagerQueue::front() const {
+std::optional<PagerMessage> PagerQueue::front() const {
     if (!messages_.empty()) {
         return messages_.front();
     }
@@ -27,7 +27,7 @@ bool PagerQueue::messagesWaiting() {
     return !messages_.empty();
 }
 
-const Message& PagerQueue::currentMessage() const {
+const PagerMessage& PagerQueue::currentMessage() const {
     if (messages_.empty()) {
         throw std::runtime_error("No unread messages in the queue");
     }

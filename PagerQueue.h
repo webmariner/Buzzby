@@ -5,20 +5,17 @@
 #include <optional>
 #include <Arduino.h>
 
-struct Message {
-    String text;
-    uint32_t ric;
-};
+#include "models.h"
 
 class PagerQueue {
 public:
-    void push(const Message& message);
-    std::optional<Message> front() const;
+    void push(const PagerMessage& message);
+    std::optional<PagerMessage> front() const;
     void markAsRead();
     bool messagesWaiting();
-    const Message& currentMessage() const;
+    const PagerMessage& currentMessage() const;
 private:
-    std::vector<Message> messages_;
+    std::vector<PagerMessage> messages_;
 };
 
 #endif // PAGERQUEUE_H

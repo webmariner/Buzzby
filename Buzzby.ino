@@ -1,10 +1,8 @@
 #include "src/ArduinoLog.h"
-#include "PagerQueue.h"
-#include "PagerReceiver.h"
+#include "BuzzbyController.h"
 #include <USB.h>
 
-PagerQueue pagerq;
-PagerReceiver pagerRx;
+BuzzbyController controller;
 
 #include "Tildagon.h"
 #include "CLI.h"
@@ -17,8 +15,7 @@ void setup() {
   USB.connect();
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
-  pagerRx.setup(pagerq);
-  loadSettings();
+  controller.setup();
   tildagonSetup();
   delay(4000);
 }
@@ -30,7 +27,7 @@ void loop() {
     }
     rp2040.rebootToBootloader();
   }
-  pagerRx.pocsagWorker();
+  controller.loop();
   tildagonLoop();
   cliWorker();
 }

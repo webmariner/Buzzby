@@ -1,24 +1,22 @@
 #ifndef PAGERRECEIVER_H
 #define PAGERRECEIVER_H
 
+#include "models.h"
 #include "src/BCH3121.h"
 #include "SX1278.h"
 #include "PagerQueue.h"
 
-struct globalErrors {
+
+const double DEFAULT_FREQUENCY = 439.9875;
+const double DEFAULT_BITRATE = 1.2;
+
+struct bchErrorTotals {
   uint32_t corrected;
   uint32_t uncorrected;
 };
 
-struct pagerMessage {
-  uint32_t ric;
-  String message;
-  bool retrieved;
-};
-
 const uint8_t pocsagSyncWord[4] = { 0x7c, 0xd2, 0x15, 0xd8 };
 const char bcdCodes[16] = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x2a, 0x55, 0x20, 0x2d, 0x29, 0x28 };
-
 
 class PagerReceiver {
 public:
@@ -31,7 +29,7 @@ public:
     void printStats();
     PagerReceiver();
 private:
-    globalErrors _errorCount;
+    bchErrorTotals _errorCount;
     uint32_t _messageCount;
     SX1278* _radio;
     PagerQueue _pagerq;
