@@ -14,7 +14,8 @@ RADIOLARIAN_I2C_ADDRESS = 0x62
 RADIOLARIAN_CMD_READ_MSG_LENGTH = 1
 RADIOLARIAN_CMD_READ_MSG_BODY = 2
 RADIOLARIAN_CMD_READ_RIC = 3
-RADIOLARIAN_CMD_READ_SETTING = 4
+RADIOLARIAN_CMD_READ_FREQUENCY = 4
+RADIOLARIAN_CMD_READ_BAUD = 5
 RADIOLARIAN_CMD_MSG_RECEIVED = 0x10
 RADIOLARIAN_CMD_NEXT_SETTING = 0x11
 
@@ -43,6 +44,8 @@ class BuzzbyApp(app.App):
         self.text_width = 0
         self.textX = 200
         self.scrollStart = 0
+        self.frequency = 0
+        self.baud = 0
         print(self.i2c.scan())
         self.pins["hs_1"].init(self.pins["hs_1"].IN)
         #self.pins["hs_1"].irq(
@@ -107,7 +110,21 @@ class BuzzbyApp(app.App):
                 self.commandSent = RADIOLARIAN_CMD_MSG_RECEIVED
                 self.cmdSentAt = time.ticks_ms()
         else:
-            if self.
+            if self.commandSent == RADIOLARIAN_CMD_NEXT_SETTING:
+                self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_FREQUENCY]))
+                self.commandSent = RADIOLARIAN_CMD_READ_FREQUENCY
+                self.cmdSentAt = time.ticks_ms()
+                return
+            if self.commandSent == RADIOLARIAN_CMD_READ_FREQUENCY:
+                self.frequency = self.read_uint32_from_radiolarian()
+                self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_BAUD]))
+                self.commandSent = RADIOLARIAN_CMD_READ_BAUD
+                self.cmdSentAt = time.ticks_ms()
+                return
+            if self.commandSent == RADIOLARIAN_CMD_READ_BAUD:
+                self.baud = self.read_uint32_from_radiolarian()
+                self.commandSent = 0
+                return
 
 
     def read_string_from_radiolarian(self, num_bytes=256, timeout_ms=500):
@@ -150,6 +167,9 @@ class BuzzbyApp(app.App):
         if not self.foregrounded: # Bring the app to the foreground on first run
             eventbus.emit(RequestForegroundPushEvent(self))
             self.foregrounded = True
+        if self.button_states.get(BUTTON_TYPES["RIGHT"]):
+            self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_NEXT_SETTING]))
+            self.cmdSentAt = time.ticks_ms()
     
     #def _handle_pagermessagerx(self, epin):
         #print("pagermessagerx irq handler called")
