@@ -19,7 +19,7 @@ void setup() {
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
   controller.setup(&Serial);
   cli.setup(&Serial, &Serial, &controller);
-  tildagonSetup();
+  Tildagon::instance().tildagonSetup(&controller);
   delay(4000);
 }
 
@@ -31,6 +31,6 @@ void loop() {
     rp2040.rebootToBootloader();
   }
   controller.loop();
-  tildagonLoop();
+  Tildagon::instance().tildagonLoop();
   cli.cliWorker();
 }
