@@ -8,6 +8,7 @@ void help() {
   Log.infoln("show version");
   Log.infoln("show stats");
   Log.infoln("show configuration");
+  Log.infoln("show msg");
   Log.infoln("set frequency [137.000-525.000]");
   Log.infoln("set bitrate [0.075-250]");
   Log.infoln("restart cpu");
@@ -17,7 +18,6 @@ void help() {
   Log.infoln("erase channel [channel name]");
   Log.infoln("next");
   Log.infoln("tildagon reset");
-  Log.infoln("exit");
   Log.infoln("help");
 }
 
@@ -36,6 +36,8 @@ void parseCommand() {
     controller.printStats();
   } else if (cmdLine.startsWith("show conf")) {
     controller.printSettings();
+  } else if (cmdLine.startsWith("show msg")) {
+    controller.printCurrentMessage();
   } else if (cmdLine.startsWith("set freq")) {
     controller.setFrequency(value.toDouble());
   } else if (cmdLine.startsWith("set bitrate")) {
@@ -56,10 +58,10 @@ void parseCommand() {
     tildagonTeardown();
     tildagonSetup();
     Log.infoln("Link to tildagon is %s", tildagonSetupComplete ? "up" : "down");
-  } else if (cmdLine.startsWith("exit")) {
-    Log.setLevel(LOG_LEVEL_SILENT);
   } else if (cmdLine.startsWith("help")) {
     help();
+  } else {
+    Log.infoln("Unknown command");
   }
   Log.info("> ");
 }

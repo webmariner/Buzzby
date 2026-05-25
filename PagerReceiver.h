@@ -5,6 +5,7 @@
 #include "src/BCH3121.h"
 #include "SX1278.h"
 #include "PagerQueue.h"
+#include "OutputHandler.h"
 
 
 const double DEFAULT_FREQUENCY = 439.9875;
@@ -25,8 +26,8 @@ public:
     void pocsagWorker();
     double getFrequency();
     double getBitrate();
-    void printRadioHardwareDetails();
-    void printStats();
+    void printRadioHardwareDetails(OutputHandler out);
+    void printStats(OutputHandler out);
     PagerReceiver();
 private:
     bchErrorTotals _errorCount;

@@ -173,10 +173,14 @@
     return readSPI(regRssi) / -2.0;
   }
 
-  void SX1278::printHwVersion() {
-    Log.infoln("SX1278 Version: %i Hardware Revision: %i", getReg(regChipVersion, 7, 4), getReg(regChipVersion, 3, 0));
+  void SX1278::printHwVersion(OutputHandler out) {
+    out.println("SX1278 Version: %i Hardware Revision: %i", getReg(regChipVersion, 7, 4), getReg(regChipVersion, 3, 0));
   }
 
-  void SX1278::printCurrentRxStats() {
+  void SX1278::logCurrentRxStats() {
     Log.infoln("RSSI: %s dBm, Gain: %s dBm, AFC: %s kHz, FEI: %s kHz", String(getRSSI(), 1).c_str(), String(getGain(), 1).c_str(), String(getAFC(), 3).c_str(), String(getFEI(), 3).c_str());
+  }
+
+  void SX1278::printCurrentRxStats(OutputHandler out) {
+    out.println("RSSI: %s dBm, Gain: %s dBm, AFC: %s kHz, FEI: %s kHz", String(getRSSI(), 1).c_str(), String(getGain(), 1).c_str(), String(getAFC(), 3).c_str(), String(getFEI(), 3).c_str());
   }

@@ -6,10 +6,12 @@ const char* FLASH_SETUP_WARNING = "Error reserving space for a channel";
 bool ChannelMemory::showChannel(const char* channelName) {
   if (!prefs.begin(channelName, true)) {
     Log.warningln(FLASH_SETUP_WARNING);
+    prefs.end();
     return false;
   }
   if (!prefs.isKey("frequency")) {
     Log.infoln("Channel '%s' not found", channelName);
+    prefs.end();
     return false;
   }
   Log.infoln("Frequency: %s MHz",String(prefs.getDouble("frequency"),5).c_str());

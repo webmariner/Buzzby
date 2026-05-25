@@ -9,7 +9,8 @@ const char* STANDARD_CHANNEL_NAMES[10] = {
 };
 const char* DEFAULT_CHANNEL = STANDARD_CHANNEL_NAMES[0];
 
-void BuzzbyController::setup() {
+void BuzzbyController::setup(Print* printer) {
+	_out.setup(printer);
 	_pagerRx.setup(_pagerq);
 	_currentChannel = CHANNEL_NOT_SET;
 	_channelNumber = 0;
@@ -19,17 +20,26 @@ void BuzzbyController::setup() {
 }
 
 void BuzzbyController::printHwDetails() {
-	_pagerRx.printRadioHardwareDetails();
+	_pagerRx.printRadioHardwareDetails(_out);
 }
 
 void BuzzbyController::printStats() {
-	_pagerRx.printStats();
+	_pagerRx.printStats(_out);
 }
 
 void BuzzbyController::printSettings() {
-	Log.infoln("Current channel/memory: %s", _currentChannel);
-    Log.infoln("Frequency: %s MHz", String(_pagerRx.getFrequency(), 5).c_str());
-    Log.infoln("Bitrate: %s kbps", String(_pagerRx.getBitrate(), 3).c_str());
+	_out.println("Current channel/memory: %s", _currentChannel);
+    _out.println("Frequency: %s MHz", String(_pagerRx.getFrequency(), 5).c_str());
+    _out.println("Bitrate: %s kbps", String(_pagerRx.getBitrate(), 3).c_str());
+}
+
+void BuzzbyController::printCurrentMessage() {
+	if (messagesWaiting()) {
+		PagerMessage curMsg = getCurrentMsg();
+		_out.println(curMsg.text.c_str());
+	} else {
+		_out.println("No messages waiting");
+	}
 }
 
 void BuzzbyController::setFrequency(double newFrequency) {

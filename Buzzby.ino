@@ -15,7 +15,7 @@ void setup() {
   USB.connect();
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_WARNING, &Serial, false);
-  controller.setup();
+  controller.setup(&Serial);
   tildagonSetup();
   delay(4000);
 }

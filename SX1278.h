@@ -2,6 +2,7 @@
 #define BUZZBY_SX1278_H
 
 #include "src/ArduinoLog.h"
+#include "OutputHandler.h"
 #include <SPI.h>
 
 const pin_size_t SX1278_SCK = 18;
@@ -82,8 +83,9 @@ public:
   double getGain();
   void setRssiThreshold(int threshold);
   double getRSSI();
-  void printHwVersion();
-  void printCurrentRxStats();
+  void logCurrentRxStats();
+  void printHwVersion(OutputHandler out);
+  void printCurrentRxStats(OutputHandler out);
   SX1278(double frequency_MHz, double bitrate_kbps, double shift_kHz, double rxBandwidth_kHz, double afcBandwidth_kHz);
 private:
   double _frequency;

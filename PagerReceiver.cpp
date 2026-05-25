@@ -145,17 +145,17 @@ PagerReceiver::PagerReceiver() {
     return _radio->getBitrate();
   }
 
-  void PagerReceiver::printRadioHardwareDetails() {
-    _radio->printHwVersion();
+  void PagerReceiver::printRadioHardwareDetails(OutputHandler out) {
+    _radio->printHwVersion(out);
   }
 
-  void PagerReceiver::printStats() {
-    _radio->printCurrentRxStats();
-    Log.info("Messages received: %i", _messageCount);
-    Log.info("   Errors corrected: %i", _errorCount.corrected);
-    Log.info("   uncorrected: %i", _errorCount.uncorrected);
-    Log.infoln("   Bytes queued: %i/%i",uxQueueMessagesWaitingFromISR(queueDIO1),queueSizeDIO1);
-    Log.infoln("   Debug: %i", Log.getLevel() - LOG_LEVEL_WARNING);
+  void PagerReceiver::printStats(OutputHandler out) {
+    _radio->printCurrentRxStats(out);
+    out.print("Messages received: %i", _messageCount);
+    out.print("   Errors corrected: %i", _errorCount.corrected);
+    out.print("   uncorrected: %i", _errorCount.uncorrected);
+    out.println("   Bytes queued: %i/%i",uxQueueMessagesWaitingFromISR(queueDIO1),queueSizeDIO1);
+    out.println("   Debug: %i", Log.getLevel() - LOG_LEVEL_WARNING);
   }
 
   void PagerReceiver::messageReceived() {
@@ -205,7 +205,7 @@ PagerReceiver::PagerReceiver() {
       detectDIO0Flag = false;
       taskEXIT_CRITICAL();
       Log.verboseln("Preamble Detected!");
-      if (Log.getLevel() > LOG_LEVEL_WARNING) _radio->printCurrentRxStats();
+      if (Log.getLevel() > LOG_LEVEL_WARNING) _radio->logCurrentRxStats();
       Log.verboseln("Bytes queued: %i/%i", uxQueueMessagesWaitingFromISR(queueDIO1), queueSizeDIO1);
       rssi = _radio->getRSSI() - _radio->getGain();
       error.corrected = 0;
