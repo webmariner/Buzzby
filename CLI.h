@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "OutputHandler.h"
 #include "BuzzbyController.h"
+#include "Tildagon.h"
 
 class CLI {
 public:
@@ -12,9 +13,9 @@ public:
 private:
   void help();
   void parseCommand();
-  String cmdLine="";
-  SerialUSB* _ser;
+  String cmdLine;
   OutputHandler _out;
+  SerialUSB* _ser;
   BuzzbyController* _control;
 };
 

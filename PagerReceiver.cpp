@@ -175,6 +175,7 @@ PagerReceiver::PagerReceiver() {
     error.uncorrected = 0;
     messageAlpha = "";
     messageNumeric = "";
+    if (message.length() == 0) return;
     _messageCount++;
     _pagerq.push({message, ric});
   }

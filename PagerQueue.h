@@ -3,19 +3,17 @@
 
 #include <vector>
 #include <optional>
-#include <Arduino.h>
 
 #include "models.h"
 
 class PagerQueue {
 public:
-    void push(const PagerMessage& message);
-    std::optional<PagerMessage> front() const;
-    void markAsRead();
-    bool messagesWaiting();
-    const PagerMessage& currentMessage() const;
+    static void push(const PagerMessage& message);
+    static void markAsRead();
+    static bool messagesWaiting();
+    const PagerMessage& currentMessage();
 private:
-    std::vector<PagerMessage> messages_;
+    static std::vector<PagerMessage> messages_;
 };
 
 #endif // PAGERQUEUE_H

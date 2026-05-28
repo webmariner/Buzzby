@@ -2,10 +2,10 @@
 #include "src/ArduinoLog.h"
 #include "BuzzbyController.h"
 #include "CLI.h"
+#include "Tildagon.h"
 
 BuzzbyController controller;
 
-#include "Tildagon.h"
 
 CLI cli;
 

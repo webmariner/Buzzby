@@ -110,8 +110,15 @@ void BuzzbyController::save() {
 	saveChannel(STANDARD_CHANNEL_NAMES[_channelNumber]);
 }
 
-const PagerMessage& BuzzbyController::getCurrentMsg() {
-	return _pagerRx.getMessageQueue().currentMessage();
+PagerMessage BuzzbyController::getCurrentMsg() {
+	PagerMessage copy;
+	String text = _pagerRx.getMessageQueue().currentMessage().text;
+	int length = text.length();
+	char textCopy[length + 1];
+	strcpy(textCopy, text.c_str());
+	copy.text = textCopy;
+	copy.ric = _pagerRx.getMessageQueue().currentMessage().ric;
+	return copy;
 }
 
 bool BuzzbyController::messagesWaiting() {

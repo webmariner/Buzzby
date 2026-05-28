@@ -61,5 +61,8 @@ The following commands assume the pi pico has connected itself in Buzzby mode at
     arduino-cli monitor
 
 ### Commands while connected to monitor
-deb 1 # set debug to level 1
-mon # toggle monitoring of receive signal strength etc
+    help        # show list of commands
+    deb 1       # set debug to level 1
+    show config # show current frequency and baud rate
+    show stats  # show signal strength, number of received messages etc.
+

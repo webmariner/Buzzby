@@ -24,7 +24,7 @@ class BuzzbyApp(app.App):
         print("in __init__")
         self.hexp_config = config
         self.i2c = self.hexp_config.i2c
-        self.button_states = Buttons(self)
+        eventbus.on(ButtonDownEvent, self._handle_buttondown, self)
         self.pins = {}
         self.pins["ls_1"] = self.hexp_config.ls_pin[0]
         self.pins["ls_2"] = self.hexp_config.ls_pin[1]
@@ -36,6 +36,7 @@ class BuzzbyApp(app.App):
         self.pins["hs_3"] = self.hexp_config.pin[2]
         self.pins["hs_4"] = self.hexp_config.pin[3]
         self.foregrounded = False
+        self.fetchingConfig = True
         self.commandSent = 0
         self.cmdSentAt = 0
         self.messageLength = 0
@@ -55,11 +56,11 @@ class BuzzbyApp(app.App):
         #)
 
     def background_update(self, delta_ticks):
-        # self.currentI2CDevices = self.i2c.scan()
-        # if RADIOLARIAN_I2C_ADDRESS in self.currentI2CDevices:
-        #     self.radiolarianConnected = True
-        # else:
-        #     self.radiolarianConnected = False
+        self.currentI2CDevices = self.i2c.scan()
+        if RADIOLARIAN_I2C_ADDRESS in self.currentI2CDevices:
+            self.radiolarianConnected = True
+        else:
+            self.radiolarianConnected = False
 
         if self.text_width > 200:
             advance = (time.ticks_ms() - self.scrollStart) / 10
@@ -72,58 +73,79 @@ class BuzzbyApp(app.App):
         else:
             self.textX = -100
 
-
-        if self.pins["hs_1"].value() == 1:
-            if self.commandSent == 0 or self.commandSent == RADIOLARIAN_CMD_MSG_RECEIVED: # or any other command not in the message fetching chain below...
-                if self.commandSent > 0 and (self.cmdSentAt + 1200) > time.ticks_ms():
-                    # A command has been sent, but give it time before we try asking for data
-                    return
+        if self.commandSent > 0 and (self.cmdSentAt + 100) > time.ticks_ms():
+            # A command has been sent, but give it time before we try following up
+            return
+        if self.pins["hs_1"].value() == 1 and self.fetchingConfig == False:
+            if self.commandSent == 0:
+                print("Sending RADIOLARIAN_CMD_READ_MSG_LENGTH")
                 self.messageLength = 0
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_MSG_LENGTH]), True)
                 self.commandSent = RADIOLARIAN_CMD_READ_MSG_LENGTH
                 self.cmdSentAt = time.ticks_ms()
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_MSG_LENGTH and self.messageLength == 0:
+                print("Asking for message length after sending RADIOLARIAN_CMD_READ_MSG_LENGTH")
                 self.messageLength = self.read_byte_from_radiolarian()
+                print(f"  Got length of {self.messageLength}")
                 if self.messageLength < 1:
                     self.commandSent = 0
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_MSG_LENGTH and self.messageLength > 0:
+                print("Sending RADIOLARIAN_CMD_READ_RIC")
                 self.ric = ""
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_RIC]))
                 self.commandSent = RADIOLARIAN_CMD_READ_RIC
                 self.cmdSentAt = time.ticks_ms()
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_RIC and self.ric == "":
+                print("Asking for RIC follwoing sending RADIOLARIAN_CMD_READ_RIC")
                 self.ric = str(self.read_uint32_from_radiolarian())
+                print(f"  Got RIC of {self.ric}")
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_RIC and len(self.ric) > 0:
+                print("Sending RADIOLARIAN_CMD_READ_MSG_BODY")
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_MSG_BODY]))
                 self.commandSent = RADIOLARIAN_CMD_READ_MSG_BODY
                 self.cmdSentAt = time.ticks_ms()
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_MSG_BODY:
+                print(f"Asking for message body with length {self.messageLength} after sending RADIOLARIAN_CMD_READ_MSG_BODY")
                 self.lastmessage = self.read_string_from_radiolarian(self.messageLength)
                 self.textX = 200
                 self.scrollStart = time.ticks_ms()
+                print("Sending RADIOLARIAN_CMD_MSG_RECEIVED")
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_MSG_RECEIVED]))
                 self.commandSent = RADIOLARIAN_CMD_MSG_RECEIVED
                 self.cmdSentAt = time.ticks_ms()
-        else:
-            if self.commandSent == RADIOLARIAN_CMD_NEXT_SETTING:
+                return
+            if self.commandSent == RADIOLARIAN_CMD_MSG_RECEIVED:
+                print("Clearing command having sent RADIOLARIAN_CMD_MSG_RECEIVED")
+                self.commandSent = 0;
+                return
+        elif self.fetchingConfig:
+            if (self.commandSent == RADIOLARIAN_CMD_NEXT_SETTING
+                    or (self.frequency == 0 and self.commandSent == 0)):
+                print("Sending RADIOLARIAN_CMD_READ_FREQUENCY")
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_FREQUENCY]))
                 self.commandSent = RADIOLARIAN_CMD_READ_FREQUENCY
                 self.cmdSentAt = time.ticks_ms()
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_FREQUENCY:
+                print("Asking for frequency having sent RADIOLARIAN_CMD_READ_FREQUENCY")
                 self.frequency = self.read_uint32_from_radiolarian()
+                print(f"  Got frequency of {self.frequency}")
+                print("Sending RADIOLARIAN_CMD_READ_BAUD")
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_READ_BAUD]))
                 self.commandSent = RADIOLARIAN_CMD_READ_BAUD
                 self.cmdSentAt = time.ticks_ms()
                 return
             if self.commandSent == RADIOLARIAN_CMD_READ_BAUD:
+                print("Asking for bitrate having sent RADIOLARIAN_CMD_READ_BAUD")
                 self.baud = self.read_uint32_from_radiolarian()
+                print(f"  Got bitrate of {self.baud}")
                 self.commandSent = 0
+                self.fetchingConfig = False
                 return
 
 
@@ -131,35 +153,44 @@ class BuzzbyApp(app.App):
         t0 = time.ticks_ms()
         while True:
             try:
+                print("read_string_from_radiolarian()", num_bytes)
                 data = self.i2c.readfrom(RADIOLARIAN_I2C_ADDRESS, num_bytes)
                 data = bytes(b for b in data if 32 <= b <= 126 or b in (9,10,13))
+                print(f"  read_string_from_radiolarian() got string: {data.decode('utf-8', 'ignore')}")
                 return data.decode('utf-8', 'ignore')
             except OSError:
+                print("  read_string_from_radiolarian() OSError")
                 if time.ticks_diff(time.ticks_ms(), t0) > timeout_ms:
-                    print(f"Timed out trying to read string from hexpansion after command {self.commandSent}")
+                    print(f"  Timed out trying to read string from hexpansion after command {self.commandSent}")
                 time.sleep_ms(10)
 
     def read_uint32_from_radiolarian(self):
         t0 = time.ticks_ms()
         while True:
             try:
+                print("read_uint32_from_radiolarian()")
                 data = self.i2c.readfrom(RADIOLARIAN_I2C_ADDRESS, 4)
                 ricky = struct.unpack('<I', data)[0]
+                print(f"  read_uint32_from_radiolarian() got uint32 {ricky}")
                 return ricky
             except OSError:
+                print("  read_uint32_from_radiolarian() OSError")
                 if time.ticks_diff(time.ticks_ms(), t0) > 500:
-                    print(f"Timed out trying to read uint32 from hexpansion after command {self.commandSent}")
+                    print(f"  Timed out trying to read uint32 from hexpansion after command {self.commandSent}")
                 time.sleep_ms(10)
 
     def read_byte_from_radiolarian(self):
         t0 = time.ticks_ms()
         while True:
             try:
+                print("read_byte_from_radiolarian()")
                 data = self.i2c.readfrom(RADIOLARIAN_I2C_ADDRESS, 1)[0]
+                print(f"  read_byte_from_radiolarian() got byte {int(data)}")
                 return int(data)
             except OSError:
+                print("  read_byte_from_radiolarian() OSError")
                 if time.ticks_diff(time.ticks_ms(), t0) > 500:
-                    print(f"Timed out trying to read byte from hexpansion after command {self.commandSent}")
+                    print(f"  Timed out trying to read byte from hexpansion after command {self.commandSent}")
                 time.sleep_ms(10)
 
 
@@ -167,26 +198,29 @@ class BuzzbyApp(app.App):
         if not self.foregrounded: # Bring the app to the foreground on first run
             eventbus.emit(RequestForegroundPushEvent(self))
             self.foregrounded = True
-        if self.button_states.get(BUTTON_TYPES["RIGHT"]):
-            self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_NEXT_SETTING]))
-            self.cmdSentAt = time.ticks_ms()
-    
-    #def _handle_pagermessagerx(self, epin):
-        #print("pagermessagerx irq handler called")
-        #print(self.pins["hs_1"].value())
-        #if not self.messageWaiting:
-            #self.commandBytesSent = 0
-            #self.messageWaiting = True
+
+    def _handle_buttondown(self, event: ButtonDownEvent):
+        if BUTTON_TYPES["UP"] in event.button:
+            message_waiting = self.pins["hs_1"].value()
+            print(f"up button pressed - message waiting: {message_waiting} fetching config: {self.fetchingConfig}")
+            if ((message_waiting == 0) and (not self.fetchingConfig)):
+                print("Message not waiting and not trying to fetch config... trying to switch channel")
+                self.fetchingConfig = True
+                self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_NEXT_SETTING]))
+                self.cmdSentAt = time.ticks_ms()
 
     def draw(self, ctx):
         ctx.save()
         clear_background(ctx)
-        if len(self.ric) > 0:
-            ctx.font_size = 26
-            ctx.text_align = ctx.LEFT
-            ctx.rgb(.4,.4,.4).move_to(-80,-30).text(f"RIC:{self.ric}")
-        ctx.font_size = 32
         ctx.text_align = ctx.LEFT
+        ctx.font_size = 26
+        if (self.baud > 0):
+            ctx.rgb(.4,.4,.4).move_to(-60,-85).text(f"{self.baud} baud")
+        if (self.frequency > 0):
+            ctx.rgb(.8,0,.8).move_to(-80,-60).text(f"{(self.frequency/1000000):8.3f} MHz")
+        if len(self.ric) > 0:
+            ctx.rgb(0,.8,.8).move_to(-70,-30).text(f"RIC:{self.ric}")
+        ctx.font_size = 32
         self.text_width = ctx.text_width(self.lastmessage)
         ctx.rgb(0, 1, 0).move_to(self.textX, 0).text(self.lastmessage)
         ctx.restore()

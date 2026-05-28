@@ -4,6 +4,7 @@ void CLI::setup(SerialUSB* ser, Print* printer, BuzzbyController* con) {
   _ser = ser;
   _out.setup(printer);
   _control = con;
+  cmdLine = "";
 }
 
 void CLI::help() {
@@ -57,10 +58,10 @@ void CLI::parseCommand() {
     _control->eraseChannel(value.c_str());
   } else if (cmdLine.startsWith("nex")) {
     _control->next();
-  //} else if (cmdLine.startsWith("tildagon reset")) {
-  //  tildagonTeardown();
-  //  tildagonSetup();
-  //  _out.println("Link to tildagon is %s", tildagonSetupComplete ? "up" : "down");
+  } else if (cmdLine.startsWith("tildagon reset")) {
+    Tildagon::instance().tildagonTeardown();
+    Tildagon::instance().tildagonSetup(_control);
+    _out.println("Link to tildagon is %s", Tildagon::instance().isSetupComplete() ? "up" : "down");
   } else if (cmdLine.startsWith("help")) {
     help();
   } else {

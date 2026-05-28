@@ -34,13 +34,18 @@ private:
   void objHandleDataReq();
   void setMessageWaitingFlag();
   void clearMessageWaitingFlag();
+  void prepForDataRequest();
   BuzzbyController* controller;
   bool tildagonSetupComplete;
   bool messageWaitingFlag;
+  bool prepRequired;
+  bool messagePrepared;
   uint8_t badgeCommandBuffer[100];
   byte tildagonNumericOutputBuffer[4];
   char tildagonTextOutputBuffer[512];
   uint32_t workingNumber;
+  uint32_t curMsgLength;
+  uint32_t curRic;
 };
 
 #endif

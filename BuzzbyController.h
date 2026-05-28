@@ -24,7 +24,7 @@ public:
   void eraseChannel(const char* channelName);
   void next();
   void save();
-  const PagerMessage& getCurrentMsg();
+  PagerMessage getCurrentMsg();
   bool messagesWaiting();
   void markAsRead();
   void loop();
