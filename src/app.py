@@ -207,6 +207,7 @@ class BuzzbyApp(app.App):
                 print("Message not waiting and not trying to fetch config... trying to switch channel")
                 self.fetchingConfig = True
                 self.i2c.writeto(RADIOLARIAN_I2C_ADDRESS, bytearray([RADIOLARIAN_CMD_NEXT_SETTING]))
+                self.commandSent = RADIOLARIAN_CMD_NEXT_SETTING
                 self.cmdSentAt = time.ticks_ms()
 
     def draw(self, ctx):
